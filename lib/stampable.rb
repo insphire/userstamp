@@ -114,7 +114,7 @@ module Ddb #:nodoc:
         end
 
         def stamper_class #:nodoc:
-          stamper_class_name.to_s.capitalize.constantize rescue nil
+          stamper_class_name.to_s.camelize.constantize rescue nil
         end
       end
 
