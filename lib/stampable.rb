@@ -101,8 +101,8 @@ module Ddb #:nodoc:
               belongs_to :updater, :class_name => klass, :foreign_key => updater_attribute
             end
 
-            before_validation :set_updater_attribute
-            before_validation :set_creator_attribute, :on => :create
+            before_save :set_updater_attribute
+            before_save :set_creator_attribute, :on => :create
 
             if defaults[:deleter]
               if defaults[:with_deleted]
@@ -146,7 +146,7 @@ module Ddb #:nodoc:
           def set_creator_attribute
             return unless self.record_userstamp
             if respond_to?(self.creator_attribute.to_sym) && has_stamper?
-              if self.send(self.creator_attribute.to_sym).blank?
+              if self.send(self.creator_attribute.to_sym).blank? and not self.persisted?
                 self.send("#{self.creator_attribute}=".to_sym, self.class.stamper_class.stamper)
               end
             end
