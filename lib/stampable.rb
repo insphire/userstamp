@@ -47,7 +47,7 @@ module Ddb #:nodoc:
           # Defaults to :deleted_by when compatibility mode is on
           class_attribute  :deleter_attribute
 
-          self.stampable
+          self.stampable unless self.respond_to?('stampable')
         end
       end
 
@@ -94,8 +94,8 @@ module Ddb #:nodoc:
             klass = "::#{stamper_class_name.to_s.singularize.camelize}"
 
             if defaults[:with_deleted]
-              belongs_to :creator, :class_name => klass, :foreign_key => creator_attribute, :with_deleted => true
-              belongs_to :updater, :class_name => klass, :foreign_key => updater_attribute, :with_deleted => true
+              belongs_to :creator, -> { with_deleted }, :class_name => klass, :foreign_key => creator_attribute
+              belongs_to :updater, -> { with_deleted }, :class_name => klass, :foreign_key => updater_attribute
             else
               belongs_to :creator, :class_name => klass, :foreign_key => creator_attribute
               belongs_to :updater, :class_name => klass, :foreign_key => updater_attribute
@@ -106,7 +106,7 @@ module Ddb #:nodoc:
 
             if defaults[:deleter]
               if defaults[:with_deleted]
-                belongs_to :deleter, :class_name => klass, :foreign_key => deleter_attribute, :with_deleted => true
+                belongs_to :deleter, -> { with_deleted }, :class_name => klass, :foreign_key => deleter_attribute
               else
                 belongs_to :deleter, :class_name => klass, :foreign_key => deleter_attribute
               end
@@ -156,7 +156,7 @@ module Ddb #:nodoc:
             return unless self.record_userstamp
             # only set updater if the record is new or has changed
             # or contains a serialized attribute (in which case the attribute value is always updated)
-            return unless self.new_record? || self.changed? || self.class.serialized_attributes.present?
+            return unless self.new_record? || self.changed?
             if respond_to?(self.updater_attribute.to_sym) && has_stamper?
               self.send("#{self.updater_attribute}=".to_sym, self.class.stamper_class.stamper)
             end
