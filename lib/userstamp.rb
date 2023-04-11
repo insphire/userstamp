@@ -48,5 +48,3 @@ module Ddb
     end
   end
 end
-
-ActionController::Base.send(:include, Ddb::Controller) if defined?(ActionController)
